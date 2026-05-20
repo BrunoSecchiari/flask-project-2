@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Stylesheet -->
+
+    <link
+      href="{{ url_for('static', filename='css/styles.css') }}"
+      rel="stylesheet"
+    />
+
+    <link
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+      rel="icon"
+      type="image/png"
+    />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Carbon -->
+
+    <script
+      type="module"
+      src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/button.min.js"
+    ></script>
+
+    <script
+      type="module"
+      src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/date-picker.min.js"
+    ></script>
+
+    <script
+      type="module"
+      src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/loading.min.js"
+    ></script>
+
+    <script
+      type="module"
+      src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/modal.min.js"
+    ></script>
+
+    <script
+      type="module"
+      src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/tabs.min.js"
+    ></script>
+
+    <script
+      type="module"
+      src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/text-input.min.js"
+    ></script>
+
+    <script
+      type="module"
+      src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/toggle.min.js"
+    ></script>
+
+    <!-- JQuery -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+
+    <!-- Javascript -->
+
+    <script src="{{ url_for('static', filename='js/handleAdministrator.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/handleBlueGroup.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/handleExpirationDate.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/handleOwner.js') }}"></script>
+
+    <script>
+      const clearFields = () => {
+        const IDS = [
+          'administrator-tab-bluegroup-name-text-input',
+          'administrator-tab-uid-text-input',
+          'bluegroup-tab-bluegroup-name-text-input',
+          'bluegroup-description-text-input',
+          'expiration-date-date-picker-input',
+          'expiration-date-tab-bluegroup-name-text-input',
+          'member-tab-bluegroup-name-text-input',
+          'member-tab-uid-text-input',
+          'owner-tab-bluegroup-name-text-input',
+          'owner-tab-uid-text-input',
+          'w3-email-text-input',
+          'w3-password-text-input',
+        ];
+
+        setTimeout(() => {
+          IDS.forEach((id) => {
+            const htmlElement = document.getElementById(id);
+            htmlElement.value = '';
+          });
+        }, 1500);
+      };
+
+      const clearValidations = () => {
+        const IDS = [
+          'administrator-tab-bluegroup-name-text-input',
+          'administrator-tab-uid-text-input',
+          'bluegroup-tab-bluegroup-name-text-input',
+          'bluegroup-description-text-input',
+          'expiration-date-date-picker-input',
+          'expiration-date-tab-bluegroup-name-text-input',
+          'member-tab-bluegroup-name-text-input',
+          'member-tab-uid-text-input',
+          'owner-tab-bluegroup-name-text-input',
+          'owner-tab-uid-text-input',
+          'w3-email-text-input',
+          'w3-password-text-input',
+        ];
+
+        IDS.forEach((id) => {
+          const htmlElement = document.getElementById(id);
+          htmlElement.invalid = false;
+          htmlElement.invalidText = '';
+        });
+      };
+
+      const displayModal = (isSuccessfull, message) => {
+        const modal = document.getElementById('modal');
+        const modalBody = document.getElementById('modal-body');
+        const modalHeader = document.getElementById('modal-header');
+
+        modalBody.innerText = message;
+        modalHeader.innerText = isSuccessfull ? 'Success' : 'Error';
+
+        setTimeout(() => {
+          modal.open = true;
+          modal.style.cssText = 'display: flex; opacity: 1;';
+        }, 1500);
+      };
+
+      const handleConstants = (value) => {
+        const ACTIONS = {
+          ADMINISTRATORS: 'administrators',
+          ADD_ADMINISTRATOR: 'add-administrator',
+          ADD_MEMBER: 'add-member',
+          BLUEGROUPS: 'bluegroups',
+          CREATE_BLUEGROUP: 'create-bluegroup',
+          CHANGE_OWNER: 'change-owner',
+          DELETE_ADMINISTRATOR: 'delete-administrator',
+          DELETE_BLUEGROUP: 'delete-bluegroup',
+          DELETE_MEMBER: 'delete-member',
+          EXPIRATION_DATES: 'expiration-dates',
+          OWNERS: 'owners',
+          UPDATE_EXPIRATION_DATE: 'update-expiration-date',
+        };
+
+        const MESSAGES = {
+          ADMINISTRATORS: {
+            SUCCESS: 'The administrators have been assessed successfully!',
+            ERROR:
+              'An error was encountered while trying to assess the administrators.',
+          },
+          ADD_ADMINISTRATOR: {
+            SUCCESS: 'The administrator has been added successfully!',
+            ERROR:
+              'An error was encountered while trying to add the administrator.',
+          },
+          ADD_MEMBER: {},
+          BLUEGROUPS: {
+            SUCCESS: 'The BlueGroups have been assessed successfully!',
+            ERROR:
+              'An error was encountered while trying to assess the BlueGroups.',
+          },
+          CREATE_BLUEGROUP: {
+            SUCCESS: 'The BlueGroup has been created successfully!',
+            ERROR:
+              'An error was encountered while trying to create the BlueGroup.',
+          },
+          CHANGE_OWNER: {
+            SUCCESS: 'The owner has been changed successfully!',
+            ERROR: 'An error was encountered while trying to change the owner.',
+          },
+          DELETE_ADMINISTRATOR: {
+            SUCCESS: 'The administrator has been deleted successfully!',
+            ERROR:
+              'An error was encountered while trying to delete the administrator.',
+          },
+          DELETE_BLUEGROUP: {
+            SUCCESS: 'The BlueGroup has been deleted successfully!',
+            ERROR:
+              'An error was encountered while trying to delete the BlueGroup.',
+          },
+          DELETE_MEMBER: {},
+          EXPIRATION_DATES: {
+            SUCCESS: 'The expiration dates have been updated successfully!',
+            ERROR:
+              'An error was encountered while trying to update the expiration dates.',
+          },
+          OWNERS: {
+            SUCCESS: 'The owners have been changed successfully!',
+            ERROR:
+              'An error was encountered while trying to change the owners.',
+          },
+          UPDATE_EXPIRATION_DATE: {
+            SUCCESS: 'The expiration date has been updated successfully!',
+            ERROR:
+              'An error was encountered while trying to update the expiration date.',
+          },
+        };
+
+        return { action: ACTIONS[value], messages: MESSAGES[value] };
+      };
+
+      const handleTabs = (inProgress) => {
+        TABS = [
+          'administrator-tab',
+          'bluegroup-tab',
+          'expiration-date-tab',
+          'owner-tab',
+        ];
+
+        TABS.forEach((tab) => {
+          const htmlElement = document.getElementById(tab);
+          htmlElement.disabled = inProgress && !htmlElement.selected;
+        });
+      };
+
+      const handleToggle = (value) => {
+        const IDS = {
+          ADMINISTRATOR: [
+            'administrator-tab-bluegroup-name-text-input',
+            'administrator-tab-uid-text-input',
+            'add-administrator-btn',
+            'delete-administrator-btn',
+          ],
+          BLUEGROUP: [
+            'bluegroup-tab-bluegroup-name-text-input',
+            'bluegroup-description-text-input',
+            'create-bluegroup-btn',
+            'delete-bluegroup-btn',
+          ],
+          EXPIRATION_DATE: [
+            'expiration-date-tab-bluegroup-name-text-input',
+            'expiration-date-date-picker-input',
+            'update-expiration-date-btn',
+          ],
+          OWNER: [
+            'owner-tab-bluegroup-name-text-input',
+            'owner-tab-uid-text-input',
+            'change-owner-btn',
+          ],
+        };
+
+        const TAB = {
+          ADMINISTRATOR: 'administrator',
+          BLUEGROUP: 'bluegroup',
+          EXPIRATION_DATE: 'expiration-date',
+          OWNER: 'owner',
+        };
+
+        // Clear Validations
+        clearValidations();
+
+        const button = document.getElementById(`${TAB[value]}s-btn`);
+        const fields = document.getElementById(`${TAB[value]}-tab-fields`);
+        const toggle = document.getElementById(`${TAB[value]}-tab-toggle`);
+
+        const display = toggle.checked ? 'block' : 'none';
+        const opacity = toggle.checked ? '1' : '0';
+        const marginBottom = toggle.checked ? '0' : '2rem';
+
+        IDS[value].forEach((id) => {
+          const htmlElement = document.getElementById(id);
+          htmlElement.style.display = toggle.checked ? 'none' : 'block';
+          htmlElement.style.opacity = toggle.checked ? '0' : '1';
+        });
+
+        button.style.display = display;
+        button.style.opacity = opacity;
+        fields.style.marginBottom = marginBottom;
+      };
+
+      const handleLoadingAnimation = (isLoading, id) => {
+        const button = document.getElementById(`${id}-btn`);
+        const loader = document.getElementById(`${id}-ldr`);
+
+        if (isLoading) {
+          button.disabled = true;
+
+          loader.active = true;
+          loader.style.display = 'block';
+          loader.style.opacity = '1';
+        } else {
+          button.disabled = false;
+
+          loader.active = false;
+
+          setTimeout(() => {
+            loader.style.display = 'none';
+            loader.style.opacity = '0';
+          }, 1500);
+        }
+      };
+
+      const handleRequest = ({
+        url,
+        method,
+        data,
+        successCallback,
+        errorCallback,
+        clickedButtonRef,
+      }) => {
+        // Validate the fields that will be used during the execution
+        const validations = validateFields(url);
+
+        if (!validations.w3Email || !validations.w3Password) {
+          return;
+        }
+
+        // Trigger the loading animation
+        handleLoadingAnimation(true, clickedButtonRef);
+
+        // Disable all the tabs except the one which is currently active
+        handleTabs(true);
+
+        // Send the request to the corresponding endpoint
+        $.ajax({
+          url: url,
+          method: method,
+          data: data,
+          success: successCallback,
+          error: errorCallback,
+        }).always(() => {
+          // Stop the loading animation
+          handleLoadingAnimation(false, clickedButtonRef);
+
+          // Clear all the input fields
+          clearFields();
+
+          // Enable all the tabs which were previously disabled
+          handleTabs(false);
+        });
+      };
+
+      const validateFields = (url) => {
+        validations = {
+          blueGroupName: false,
+          expirationDate: false,
+          userId: false,
+          w3Email: false,
+          w3Password: false,
+        };
+
+        const isEmpty = (field, key) => {
+          if (!Boolean(field.value)) {
+            field.invalid = true;
+            field.invalidText = 'This field cannot be empty';
+            validations[key] = false;
+          } else {
+            field.invalid = false;
+            field.invalidText = '';
+            validations[key] = true;
+          }
+        };
+
+        let blueGroupName;
+        let userId;
+        switch (url) {
+          case '/administrator':
+            blueGroupName = document.getElementById(
+              'administrator-tab-bluegroup-name-text-input'
+            );
+            userId = document.getElementById(
+              'administrator-tab-uid-text-input'
+            );
+            break;
+          case '/bluegroup':
+            blueGroupName = document.getElementById(
+              'bluegroup-tab-bluegroup-name-text-input'
+            );
+            break;
+          case '/expiration_date':
+            blueGroupName = document.getElementById(
+              'expiration-date-tab-bluegroup-name-text-input'
+            );
+            break;
+          case '/owner':
+            blueGroupName = document.getElementById(
+              'owner-tab-bluegroup-name-text-input'
+            );
+            userId = document.getElementById('owner-tab-uid-text-input');
+            break;
+          default:
+            break;
+        }
+
+        const w3Email = document.getElementById('w3-email-text-input');
+        const w3Password = document.getElementById('w3-password-text-input');
+
+        // BlueGroup Name
+        isEmpty(blueGroupName, 'blueGroupName');
+
+        // w3 - Email
+        isEmpty(w3Email, 'w3Email');
+
+        // w3 - Password
+        isEmpty(w3Password, 'w3Password');
+
+        // Expiration Date
+        if (url === '/expiration_date') {
+          const expirationDate = document.getElementById(
+            'expiration-date-date-picker-input'
+          );
+          isEmpty(expirationDate, 'expirationDate');
+        }
+
+        // Owner
+        if (url === '/administrator' || url === '/owner') {
+          isEmpty(userId, 'userId');
+        }
+
+        return validations;
+      };
+    </script>
+
+    <title>CRAFT - BlueGroups</title>
+  </head>
+  <body>
+    <!-- Title -->
+    <div style="font-size: 22px">CRAFT - BlueGroups</div>
+
+    <!-- Fields -->
+    <div style="display: flex; gap: 1rem">
+      <cds-text-input
+        id="w3-email-text-input"
+        label="w3 - Email *"
+        type="email"
+        placeholder="Enter your email"
+        style="width: 300px"
+      ></cds-text-input>
+      <cds-text-input
+        id="w3-password-text-input"
+        label="w3 - Password *"
+        type="password"
+        placeholder="Enter your password"
+        style="width: 300px"
+      ></cds-text-input>
+    </div>
+
+    <!-- Tabs -->
+    <cds-tabs value="administrators" style="min-height: 50px">
+      <cds-tab
+        id="administrator-tab"
+        target="administrator-panel"
+        value="administrators"
+        onclick="clearValidations()"
+        selected
+        >Administrator</cds-tab
+      >
+      <cds-tab
+        id="bluegroup-tab"
+        target="bluegroup-panel"
+        value="bluegroups"
+        onclick="clearValidations()"
+        >BlueGroup</cds-tab
+      >
+      <cds-tab
+        id="expiration-date-tab"
+        target="expiration-date-panel"
+        value="expiration-dates"
+        onclick="clearValidations()"
+        >Expiration Date</cds-tab
+      >
+      <cds-tab
+        id="member-tab"
+        target="member-panel"
+        value="members"
+        onclick="clearValidations()"
+        disabled
+        >Member</cds-tab
+      >
+      <cds-tab
+        id="owner-tab"
+        target="owner-panel"
+        value="owners"
+        onclick="clearValidations()"
+        >Owner</cds-tab
+      >
+    </cds-tabs>
+
+    <div>
+      <!-- Administrator Tab -->
+      <div
+        id="administrator-panel"
+        role="tabpanel"
+        aria-labelledby="administrator-tab"
+        hidden=""
+      >
+        <!-- Administrator Tab - Fields -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem">
+          <cds-toggle
+            id="administrator-tab-toggle"
+            label-b="No"
+            label-a="Yes"
+            label-text="Would you like to add or delete administrators in bulk?"
+            size="md"
+            checked
+            onclick="handleToggle('ADMINISTRATOR')"
+          ></cds-toggle>
+        </div>
+        <div
+          id="administrator-tab-fields"
+          style="display: flex; flex-direction: column; gap: 1rem"
+        >
+          <cds-text-input
+            id="administrator-tab-bluegroup-name-text-input"
+            label="BlueGroup Name *"
+            type="text"
+            placeholder="Enter the BlueGroup's name"
+            style="width: 300px; display: none; opacity: 0"
+          ></cds-text-input>
+          <cds-text-input
+            id="administrator-tab-uid-text-input"
+            label="User ID *"
+            type="text"
+            placeholder="Enter the user you want to add or remove from the BlueGroup"
+            style="width: 450px; display: none; opacity: 0"
+          ></cds-text-input>
+        </div>
+        <!-- Administrator Tab - Buttons -->
+        <div style="display: flex; gap: 1rem">
+          <div style="position: relative">
+            <cds-button
+              id="administrators-btn"
+              type="button"
+              onclick="handleAdministrator('ADMINISTRATORS')"
+              >Bulk Add/Delete Administrators</cds-button
+            >
+            <cds-loading
+              id="administrators-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+        <div
+          id="administrator-tab-buttons"
+          style="display: flex; gap: 1rem; margin-bottom: 2rem"
+        >
+          <div style="position: relative">
+            <cds-button
+              id="add-administrator-btn"
+              type="button"
+              onclick="handleAdministrator('ADD_ADMINISTRATOR')"
+              style="display: none; opacity: 0"
+              >Add Administrator</cds-button
+            >
+            <cds-loading
+              id="add-administrator-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+          <div style="position: relative">
+            <cds-button
+              id="delete-administrator-btn"
+              type="button"
+              onclick="() => console.log('The administrator has been deleted successfully!')"
+              style="display: none; opacity: 0"
+              disabled
+              >Delete Administrator</cds-button
+            >
+            <cds-loading
+              id="delete-administrator-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+      </div>
+
+      <!-- BlueGroup Tab -->
+      <div
+        id="bluegroup-panel"
+        role="tabpanel"
+        aria-labelledby="bluegroup-tab"
+        hidden=""
+      >
+        <!-- BlueGroup Tab - Fields -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem">
+          <cds-toggle
+            id="bluegroup-tab-toggle"
+            label-b="No"
+            label-a="Yes"
+            label-text="Would you like to create or delete BlueGroups in bulk?"
+            size="md"
+            checked
+            onclick="handleToggle('BLUEGROUP')"
+          ></cds-toggle>
+        </div>
+        <div id="bluegroup-tab-fields" style="display: flex; gap: 1rem">
+          <cds-text-input
+            id="bluegroup-tab-bluegroup-name-text-input"
+            label="BlueGroup Name *"
+            type="text"
+            placeholder="Enter the BlueGroup's name"
+            style="display: none; opacity: 0; width: 300px"
+          ></cds-text-input>
+          <cds-text-input
+            id="bluegroup-description-text-input"
+            label="BlueGroup Description"
+            type="text"
+            placeholder="Enter the BlueGroup's description"
+            style="display: none; opacity: 0; width: 300px"
+          ></cds-text-input>
+        </div>
+        <!-- BlueGroup Tab - Buttons -->
+        <div style="display: flex; gap: 1rem">
+          <div style="position: relative">
+            <cds-button
+              id="bluegroups-btn"
+              type="button"
+              onclick="handleBlueGroup('BLUEGROUPS')"
+              >Bulk Create/Delete BlueGroups</cds-button
+            >
+            <cds-loading
+              id="bluegroups-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem">
+          <div style="position: relative">
+            <cds-button
+              id="create-bluegroup-btn"
+              type="button"
+              style="display: none; opacity: 0"
+              onclick="handleBlueGroup('CREATE_BLUEGROUP')"
+              >Create BlueGroup</cds-button
+            >
+            <cds-loading
+              id="create-bluegroup-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+          <div style="position: relative">
+            <cds-button
+              id="delete-bluegroup-btn"
+              type="button"
+              style="display: none; opacity: 0"
+              onclick="handleBlueGroup('DELETE_BLUEGROUP')"
+              >Delete BlueGroup</cds-button
+            >
+            <cds-loading
+              id="delete-bluegroup-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiration Date Tab -->
+      <div
+        id="expiration-date-panel"
+        role="tabpanel"
+        aria-labelledby="expiration-date-tab"
+        hidden=""
+      >
+        <!-- Expiration Date Tab - Fields -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem">
+          <cds-toggle
+            id="expiration-date-tab-toggle"
+            label-b="No"
+            label-a="Yes"
+            label-text="Would you like to update the expiration dates in bulk?"
+            size="md"
+            checked
+            onclick="handleToggle('EXPIRATION_DATE')"
+          ></cds-toggle>
+        </div>
+        <div
+          id="expiration-date-tab-fields"
+          style="display: flex; flex-direction: column; gap: 1rem"
+        >
+          <cds-text-input
+            id="expiration-date-tab-bluegroup-name-text-input"
+            label="BlueGroup Name *"
+            type="text"
+            placeholder="Enter the BlueGroup's name"
+            style="display: none; opacity: 0; width: 300px"
+          ></cds-text-input>
+          <cds-date-picker
+            allow-input="true"
+            close-on-select="true"
+            date-format="m/d/Y"
+            min-date="{{ current_date }}"
+          >
+            <cds-date-picker-input
+              id="expiration-date-date-picker-input"
+              kind="single"
+              label-text="Expiration Date *"
+              placeholder="yyyy/mm/dd"
+              size="md"
+              style="display: none; opacity: 0"
+            >
+            </cds-date-picker-input>
+          </cds-date-picker>
+        </div>
+        <!-- Expiration Date Tab - Buttons -->
+        <div style="display: flex; gap: 1rem">
+          <div style="position: relative">
+            <cds-button
+              id="expiration-dates-btn"
+              type="button"
+              onclick="handleExpirationDate('EXPIRATION_DATES')"
+              >Bulk Update Expiration Dates</cds-button
+            >
+            <cds-loading
+              id="expiration-dates-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem">
+          <div style="position: relative">
+            <cds-button
+              id="update-expiration-date-btn"
+              type="button"
+              style="display: none; opacity: 0"
+              onclick="handleExpirationDate('UPDATE_EXPIRATION_DATE')"
+              >Update Expiration Date</cds-button
+            >
+            <cds-loading
+              id="update-expiration-date-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+      </div>
+
+      <!-- Member Tab -->
+      <div
+        id="member-panel"
+        role="tabpanel"
+        aria-labelledby="member-tab"
+        hidden=""
+      >
+        <!-- Member Tab - Fields -->
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+          "
+        >
+          <cds-text-input
+            id="member-tab-bluegroup-name-text-input"
+            label="BlueGroup Name *"
+            type="text"
+            placeholder="Enter the BlueGroup's name"
+            style="width: 300px"
+          ></cds-text-input>
+          <cds-text-input
+            id="member-tab-uid-text-input"
+            label="User ID *"
+            type="text"
+            placeholder="Enter the user you want to add or remove from the BlueGroup"
+            style="width: 450px"
+          ></cds-text-input>
+        </div>
+        <!-- Member Tab - Buttons -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem">
+          <div style="position: relative">
+            <cds-button
+              id="add-member-btn"
+              type="button"
+              onclick="() => console.log('The member has been added successfully!')"
+              disabled
+              >Add Member</cds-button
+            >
+            <cds-loading
+              id="add-member-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+          <div style="position: relative">
+            <cds-button
+              id="delete-member-btn"
+              type="button"
+              onclick="() => console.log('The member has been deleted successfully!')"
+              disabled
+              >Delete Member</cds-button
+            >
+            <cds-loading
+              id="delete-member-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+      </div>
+
+      <!-- Owner Tab -->
+      <div
+        id="owner-panel"
+        role="tabpanel"
+        aria-labelledby="owner-tab"
+        hidden=""
+      >
+        <!-- Owner Tab - Fields -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem">
+          <cds-toggle
+            id="owner-tab-toggle"
+            label-b="No"
+            label-a="Yes"
+            label-text="Would you like to change the owners in bulk?"
+            size="md"
+            checked
+            onclick="handleToggle('OWNER')"
+          ></cds-toggle>
+        </div>
+        <div
+          id="owner-tab-fields"
+          style="display: flex; flex-direction: column; gap: 1rem"
+        >
+          <cds-text-input
+            id="owner-tab-bluegroup-name-text-input"
+            label="BlueGroup Name *"
+            type="text"
+            placeholder="Enter the BlueGroup's name"
+            style="display: none; opacity: 0; width: 300px"
+          ></cds-text-input>
+          <cds-text-input
+            id="owner-tab-uid-text-input"
+            label="User ID *"
+            type="text"
+            placeholder="Enter the user you want to add or remove from the BlueGroup"
+            style="display: none; opacity: 0; width: 450px"
+          ></cds-text-input>
+        </div>
+        <!-- Owner Tab - Buttons -->
+        <div style="display: flex; gap: 1rem">
+          <div style="position: relative">
+            <cds-button
+              id="owners-btn"
+              type="button"
+              onclick="handleOwner('OWNERS')"
+              >Bulk Change Owners</cds-button
+            >
+            <cds-loading
+              id="owners-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem">
+          <div style="position: relative">
+            <cds-button
+              id="change-owner-btn"
+              type="button"
+              onclick="handleOwner('CHANGE_OWNER')"
+              style="display: none; opacity: 0"
+              >Change Owner</cds-button
+            >
+            <cds-loading
+              id="change-owner-ldr"
+              type="small"
+              style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                display: none;
+                opacity: 0;
+              "
+            ></cds-loading>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div>
+      <cds-modal id="modal" size="sm" style="display: none; opacity: 0">
+        <cds-modal-header>
+          <cds-modal-close-button></cds-modal-close-button>
+          <cds-modal-heading id="modal-header"
+            >The title of the modal should be placed here</cds-modal-heading
+          >
+        </cds-modal-header>
+        <cds-modal-body
+          ><p id="modal-body" style="margin: 0; padding: 0">
+            The message of the modal should be placed here
+          </p></cds-modal-body
+        >
+      </cds-modal>
+    </div>
+  </body>
+</html>
